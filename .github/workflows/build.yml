@@ -18,24 +18,24 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Unzip and Move Files
+    - name: Unzip Project
       run: |
-        # 1. Giải nén file zip
         unzip -o TPMS_Project.zip
-        
-        # 2. Đưa toàn bộ file từ thư mục TPMS_Project ra ngoài gốc
-        cp -r TPMS_Project/* . || true
-        cp -r TPMS_Project/.* . || true
-        
-        # 3. Khởi tạo gradle wrapper
-        gradle wrapper
-        chmod +x gradlew
+
+    - name: Setup Gradle
+      uses: gradle/gradle-build-action@v2
+      with:
+        build-root-directory: TPMS_Project
 
     - name: Build Debug APK
-      run: ./gradlew assembleDebug
+      working-directory: ./TPMS_Project
+      run: |
+        gradle wrapper
+        chmod +x gradlew
+        ./gradlew assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: TPMS-App
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: TPMS_Project/app/build/outputs/apk/debug/app-debug.apk
