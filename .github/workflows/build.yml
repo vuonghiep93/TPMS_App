@@ -12,10 +12,19 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
-    - name: Unzip Project Files
+    - name: Unzip project file
       run: |
-        # Tự động tìm và giải nén mọi file .zip trong kho lưu trữ
-        find . -name "*.zip" -exec unzip -o {} \;
+        # Giải nén chính xác file TPMS_Project.zip
+        unzip -o TPMS_Project.zip
+        
+        # Chuyển tất cả file ra thư mục gốc nếu bị nằm trong thư mục con
+        if [ -d "TPMS_Project" ]; then
+          cp -r TPMS_Project/* . || true
+          cp -r TPMS_Project/.* . || true
+        fi
+        
+        # Phân quyền chạy cho gradlew
+        chmod +x gradlew || true
 
     - name: Set up JDK 17
       uses: actions/setup-java@v3
@@ -27,9 +36,7 @@ jobs:
       uses: gradle/gradle-build-action@v2
 
     - name: Build Debug APK
-      run: |
-        chmod +x gradlew || true
-        ./gradlew assembleDebug
+      run: ./gradlew assembleDebug
 
     - name: Upload APK
       uses: actions/upload-artifact@v3
