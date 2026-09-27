@@ -1,49 +1,23 @@
-name: Build APK from ZIP
-
-on:
-  push:
-    branches: [ "main", "master" ]
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-
-    - name: Extract and Flatten Project
-      run: |
-        # 1. Giải nén file zip vào thư mục tạm temp_extract
-        unzip -o TPMS_Project.zip -d temp_extract
-        
-        # 2. Tìm thư mục chứa file build.gradle bên trong thư mục tạm
-        PROJECT_ROOT=$(find temp_extract -name "build.gradle" -not -path "*/app/*" -exec dirname {} \;)
-        
-        # 3. Chuyển toàn bộ file ra ngay ngoài thư mục gốc của repository
-        cp -rn $PROJECT_ROOT/* . || true
-        cp -rn $PROJECT_ROOT/.* . || true
-        
-        # 4. Dọn dẹp thư mục tạm
-        rm -rf temp_extract
-        
-        # 5. Phân quyền thực thi cho gradlew
-        chmod +x gradlew || true
-
-    - name: Setup Gradle
-      uses: gradle/gradle-build-action@v2
-
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: TPMS-App
-        path: app/build/outputs/apk/debug/app-debug.apk
+name: Build APK 
+on: [push] 
+jobs: 
+  build: 
+    runs-on: ubuntu-latest 
+    steps: 
+    - uses: actions/checkout@v3 
+    - name: Set up JDK 17 
+      uses: actions/setup-java@v3 
+      with: 
+        java-version: '17' 
+        distribution: 'temurin' 
+    - name: Setup Gradle 
+      uses: gradle/gradle-build-action@v2 
+    - name: Make gradlew executable 
+      run: chmod +x gradlew 
+    - name: Build Debug APK 
+      run: ./gradlew assembleDebug 
+    - name: Upload APK 
+      uses: actions/upload-artifact@v3 
+      with: 
+        name: TPMS-App 
+        path: app/build/outputs/apk/debug/app-debug.apk 
